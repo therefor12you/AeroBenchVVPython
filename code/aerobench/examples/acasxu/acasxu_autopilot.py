@@ -427,7 +427,7 @@ class AcasXuAutopilot(Autopilot):
 
         # trim to limits
         nz_cmd = max(self.cfg_min_nz_cmd, min(self.cfg_max_nz_cmd, nz_cmd))
-        throttle = max(min(throttle, 1), 0)
+        #throttle = max(min(throttle, 1), 0) # do not limit throttle as negative throttle is valid as it gets passed through high/low level controllers
 
         return [nz_cmd, ps_cmd, 0, throttle]
 
@@ -450,7 +450,7 @@ class AcasXuAutopilot(Autopilot):
 
         # trim to limits
         nz_cmd = max(self.cfg_min_nz_cmd, min(self.cfg_max_nz_cmd, nz_cmd))
-        throttle = max(min(throttle, 1), 0)
+        #throttle = max(min(throttle, 1), 0) # do not limit throttle as negative throttle is valid as it gets passed through high/low level controllers
 
         return [nz_cmd, ps_cmd, 0, throttle]
 
