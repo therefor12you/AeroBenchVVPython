@@ -1,15 +1,10 @@
-'''
-Stanley Bak
-run_f16_sim python version
-'''
-
 import time
 
 import numpy as np
 from scipy.integrate import RK45
 
 from aerobench.code.aerobench.highlevel.controlled_f16 import controlled_f16
-from aerobench.code.aerobench.util import get_state_names, Euler, Freezable, StateIndex
+from aerobench.code.aerobench.util import get_state_names, Euler, StateIndex, print_state, Freezable
 
 class F16SimState(Freezable):
     '''object containing simulation state
@@ -183,11 +178,13 @@ class F16SimState(Freezable):
             # get the state at next_step_time
             self.times.append(next_step_time)
 
-            if abs(self.integrator.t - next_step_time) < tol:
-                self.states.append(self.integrator.x)
-            else:
-                dense_output = self.integrator.dense_output()
-                self.states.append(dense_output(next_step_time))
+            # if abs(self.integrator.t - next_step_time) < tol:
+            #     self.states.append(self.integrator.y)
+            # else:
+            #     dense_output = self.integrator.dense_output()
+            #     self.states.append(dense_output(next_step_time))
+            dense_output = self.integrator.dense_output()
+            self.states.append(dense_output(next_step_time))
 
             # re-run dynamics function at current state to get non-state variables
             if self.extended_states:
@@ -252,87 +249,8 @@ def run_f16_sim(initial_state, tmax, ap, step=1/30, extended_states=False,
                 integrator_str, v2_integrators, print_errors, custom_stop_func=custom_stop_func)
 
     fss.simulate_to(tmax)
-    llc = ap.llc
 
-    num_vars = len(get_state_names()) + llc.get_num_integrators()
-
-    if initial_state.size < num_vars:
-        # append integral error states to state vector
-        x0 = np.zeros(num_vars)
-        x0[:initial_state.shape[0]] = initial_state
-    else:
-        x0 = initial_state
-
-    assert x0.size % num_vars == 0, f"expected initial state ({x0.size} vars) to be multiple of {num_vars} vars"
-
-    # run the numerical simulation
-    times = [0]
-    states = [x0]
-
-    # mode can change at time 0
-    ap.advance_discrete_mode(times[-1], states[-1])
-
-    modes = [ap.mode]
-
-    if extended_states:
-        xd, u, Nz, ps, Ny_r = get_extended_states(ap, times[-1], states[-1], fss.model_str, v2_integrators)
-
-        xd_list = [xd]
-        u_list = [u]
-        Nz_list = [Nz]
-        ps_list = [ps]
-        Ny_r_list = [Ny_r]
-
-    der_func = make_der_func(ap, fss.model_str, v2_integrators)
-
-    if integrator_str == 'rk45':
-        integrator_class = RK45
-        kwargs = {}
-    else:
-        assert integrator_str == 'euler'
-        integrator_class = Euler
-        kwargs = {'step': step}
-
-    # note: fixed_step argument is unused by rk45, used with euler
-    integrator = integrator_class(der_func, times[-1], states[-1], tmax, **kwargs)
-
-    while integrator.status == 'running':
-        integrator.step()
-
-        # if integrator.t >= times[-1] + step:
-        dense_output = integrator.dense_output()
-
-        while integrator.t >= times[-1] + step:
-            t = times[-1] + step
-
-            times.append(t)
-            states.append(dense_output(t))
-
-            updated = ap.advance_discrete_mode(times[-1], states[-1])
-            modes.append(ap.mode)
-
-            # re-run dynamics function at current state to get non-state variables
-            if extended_states:
-                xd, u, Nz, ps, Ny_r = get_extended_states(ap, times[-1], states[-1], fss.model_str, v2_integrators)
-
-                xd_list.append(xd)
-                u_list.append(u)
-
-                Nz_list.append(Nz)
-                ps_list.append(ps)
-                Ny_r_list.append(Ny_r)
-
-            if ap.is_finished(times[-1], states[-1]):
-                # this both causes the outer loop to exit and sets res['status'] appropriately
-                integrator.status = 'autopilot finished'
-                break
-
-            if updated:
-                # re-initialize the integration class on discrete mode switches
-                integrator = integrator_class(der_func, times[-1], states[-1], tmax, **kwargs)
-                break
-
-    assert 'finished' in integrator.status
+    # extract states
 
     res = {}
     res['status'] = fss.integrator.status

@@ -133,7 +133,10 @@ def plot_overhead(run_sim_result, waypoints=None, llc=None, figsize=(7, 5), plot
 
     #     label = 'Start' if i == 0 else None
     #     ax.plot([xs[0]], [ys[1]], 'k*', ms=8, label=label)
-
+    
+    if not isinstance(run_sim_result, list):
+        run_sim_result = [run_sim_result]
+    
     ap_names=['aerobench', 'guidance']
     for i, res in enumerate(run_sim_result):
         states = res['states']
@@ -158,12 +161,13 @@ def plot_overhead(run_sim_result, waypoints=None, llc=None, figsize=(7, 5), plot
 
     plt.tight_layout()
 
-def plot_attitude(run_sim_result, title='Attitude History', skip_yaw=True, figsize=(7, 5)):
+def plot_attitude(run_sim_result, title='Attitude History', skip_yaw=True, figsize=(7, 5), ax=None):
     'plot a single variable over time'
 
-    make_ax = ax is None
+    
     res = run_sim_result
 
+    make_ax = ax is None
     if make_ax:
         init_plot()
 
