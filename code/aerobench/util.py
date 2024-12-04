@@ -2,7 +2,9 @@
 Utilities for F-16 GCAS
 '''
 
+import os
 from math import floor, ceil
+
 import numpy as np
 
 class StateIndex:
@@ -31,6 +33,12 @@ class StateIndex:
     H = 11
     
     POW = 12
+
+def print_state(state):
+    'print the state to stdout'
+
+    for l, s in zip(get_state_names(), state):
+        print(f"{l}: {s}")
 
 class Freezable():
     'a class where you can freeze the fields (prevent new fields from being created)'
@@ -229,6 +237,7 @@ def extract_single_result(res, index, llc):
 
     return rv
 
+
 class SafetyLimits(Freezable):
     'a class for holding a set of safety limits.'
 
@@ -285,3 +294,12 @@ class SafetyLimitsVerifier(Freezable):
 
             if self.safety_limits.betaMaxDeg is not None:
                 assert beta <= self.safety_limits.betaMaxDeg, "Beta is not less than the specified max."
+
+def get_script_path(script_filename):
+    '''get the path this script
+
+    Pass __file__ as the argument
+    '''
+    
+    return os.path.dirname(os.path.realpath(script_filename))
+

@@ -129,7 +129,7 @@ def make_anim(res, filename, viewsize=1000, viewsize_z=1000, f16_scale=30, trail
 
     ##
 
-    parent = get_script_path()
+    parent = get_script_path(__file__)
     plane_point_data = os.path.join(parent, 'f-16.mat')
 
     data = loadmat(plane_point_data)
@@ -331,7 +331,7 @@ def make_anim(res, filename, viewsize=1000, viewsize_z=1000, f16_scale=30, trail
 
     interval = 30
 
-    if filename.endswith('.gif'):
+    if filename is not None and filename.endswith('.gif'):
         interval = 60
 
     anim_obj = animation.FuncAnimation(fig, anim_func, frames, interval=interval, \

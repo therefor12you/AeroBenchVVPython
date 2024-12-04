@@ -6,11 +6,14 @@ Python code for F-16 animation video output
 import math
 import os
 
+from scipy import ndimage
+
 import numpy as np
-from numpy import rad2deg
+
+from matplotlib.image import BboxImage
+from matplotlib.transforms import Bbox, TransformedBbox
 
 import matplotlib
-import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 
 from aerobench.code.aerobench.util import get_state_names, StateIndex
@@ -24,15 +27,86 @@ def init_plot():
 
     matplotlib.use('TkAgg') # set backend
 
-    parent = get_script_path()
+    parent = get_script_path(__file__)
     p = os.path.join(parent, 'bak_matplotlib.mlpstyle')
 
     plt.style.use(['bmh', p])
 
-def plot_overhead(run_sim_result, waypoints=None, llc=None):
+def set_axis_limits(ax, num_vars, states, zoom_factor=1.2):
+    '''set axis limits
+
+    returns [xmin, xmax, ymin, ymax]
+    '''
+
+    assert len(states) > 0
+
+    minx, miny = np.inf, np.inf
+    maxx, maxy = -np.inf, -np.inf
+
+    for state in states:
+        start = 0
+        end = num_vars
+
+        while start < state.size:
+            s = state[start:end]
+            start = end
+            end += num_vars
+
+            x = s[StateIndex.POS_E]
+            y = s[StateIndex.POS_N]
+
+            minx = min(minx, x)
+            maxx = max(maxx, x)
+            miny = min(miny, y)
+            maxy = max(maxy, y)
+
+    dx = maxx - minx
+    dy = maxy - miny
+
+    if dx < dy:
+        midx = (maxx + minx) / 2
+
+        minx = midx - dy/2
+        maxx = midx + dy/2
+        dx = dy
+    elif dy < dx:
+        midy = (maxy + miny) / 2
+
+        miny = midy - dx/2
+        maxy = midy + dx/2
+        dy = dx
+
+    print(f"zoom_factor: {zoom_factor}, x range before: {minx, maxx}")
+    # adjust zoom
+    midx = (maxx + minx) / 2
+    midy = (maxy + miny) / 2
+
+    minx = midx - zoom_factor * dx/2
+    maxx = midx + zoom_factor * dx/2
+
+    miny = midy - zoom_factor * dy/2
+    maxy = midy + zoom_factor * dy/2
+
+    print(f"x range after: {minx, maxx}")
+
+    # add buffer
+    xs = [minx, maxx]
+    ys = [miny, maxy]
+
+    ax.set_xlim(xs)
+    ax.set_ylim(ys)
+
+    return xs + ys
+
+def plot_overhead(run_sim_result, waypoints=None, llc=None, figsize=(7, 5), plot_frame=0, plane_size_factor=0.05,
+                  zoom_factor=1.2, axis_limits=None, aircraft_red_mask=None):
     '''altitude over time plot from run_f16_sum result object
 
     note: call plt.show() afterwards to have plot show up
+
+    plane_size_factor is percent of axis limits
+
+    returns axis object
     '''
 
     init_plot()
@@ -87,13 +161,16 @@ def plot_overhead(run_sim_result, waypoints=None, llc=None):
 def plot_attitude(run_sim_result, title='Attitude History', skip_yaw=True, figsize=(7, 5)):
     'plot a single variable over time'
 
-    init_plot()
-
+    make_ax = ax is None
     res = run_sim_result
-    fig = plt.figure(figsize=figsize)
 
-    ax = fig.add_subplot(1, 1, 1)
-    ax.ticklabel_format(useOffset=False)
+    if make_ax:
+        init_plot()
+
+        fig = plt.figure(figsize=figsize)
+
+        ax = fig.add_subplot(1, 1, 1)
+        ax.ticklabel_format(useOffset=False)
 
     times = res['times']
     states = res['states']
@@ -107,7 +184,7 @@ def plot_attitude(run_sim_result, title='Attitude History', skip_yaw=True, figsi
     for index, label, color in zip(indices, labels, colors):
         if skip_yaw and index == StateIndex.PSI:
             continue
-        
+
         ys = states[:, index] # 11: altitude (ft)
 
         ax.plot(times, ys * rad_to_deg_factor, color, label=label)
@@ -119,19 +196,24 @@ def plot_attitude(run_sim_result, title='Attitude History', skip_yaw=True, figsi
         ax.set_title(title)
 
     ax.legend()
-    plt.tight_layout()
 
-def plot_outer_loop(run_sim_result, title='Outer Loop Controls'):
+    if make_ax:
+        plt.tight_layout()
+
+def plot_outer_loop(run_sim_result, title='Outer Loop Controls', ax=None):
     'plot a single variable over time'
-
-    init_plot()
 
     res = run_sim_result
     assert 'u_list' in res, "Simulation must be run with extended_states=True"
-    fig = plt.figure(figsize=(7, 5))
+    make_ax = ax is None
 
-    ax = fig.add_subplot(1, 1, 1)
-    ax.ticklabel_format(useOffset=False)
+    if make_ax:
+        init_plot()
+
+        fig = plt.figure(figsize=(7, 5))
+
+        ax = fig.add_subplot(1, 1, 1)
+        ax.ticklabel_format(useOffset=False)
 
     times = res['times']
     u_list = res['u_list']
@@ -171,19 +253,25 @@ def plot_outer_loop(run_sim_result, title='Outer Loop Controls'):
         ax.set_title(title)
 
     ax.legend()
-    plt.tight_layout()
 
-def plot_inner_loop(run_sim_result, title='Inner Loop Controls'):
+    if make_ax:
+        plt.tight_layout()
+
+def plot_inner_loop(run_sim_result, title='Inner Loop Controls', ax=None):
     'plot inner loop controls over time'
-
-    init_plot()
 
     res = run_sim_result
     assert 'u_list' in res, "Simulation must be run with extended_states=True"
-    fig = plt.figure(figsize=(7, 5))
 
-    ax = fig.add_subplot(1, 1, 1)
-    ax.ticklabel_format(useOffset=False)
+    make_ax = ax is None
+
+    if make_ax:
+        init_plot()
+
+        fig = plt.figure(figsize=(7, 5))
+
+        ax = fig.add_subplot(1, 1, 1)
+        ax.ticklabel_format(useOffset=False)
 
     times = res['times']
     u_list = res['u_list']
@@ -210,18 +298,23 @@ def plot_inner_loop(run_sim_result, title='Inner Loop Controls'):
         ax.set_title(title)
 
     ax.legend()
-    plt.tight_layout()
 
-def plot_single(run_sim_result, state_name, title=None):
+    if make_ax:
+        plt.tight_layout()
+
+def plot_single(run_sim_result, state_name, title=None, ax=None):
     'plot a single variable over time'
 
-    init_plot()
-
+    make_ax = ax is None
     res = run_sim_result
-    fig = plt.figure(figsize=(7, 5))
 
-    ax = fig.add_subplot(1, 1, 1)
-    ax.ticklabel_format(useOffset=False)
+    if ax is None:
+        init_plot()
+
+        fig = plt.figure(figsize=(7, 5))
+
+        ax = fig.add_subplot(1, 1, 1)
+        ax.ticklabel_format(useOffset=False)
 
     times = res['times']
     states = res['states']
@@ -237,16 +330,8 @@ def plot_single(run_sim_result, state_name, title=None):
     if title is not None:
         ax.set_title(title)
 
-    plt.tight_layout()
-
-def plot_altitude(run_sim_result):
-    '''altitude over time plot from run_f16_sum result object
-
-    note: call plt.show() afterwards to have plot show up
-    '''
-
-    plot_single(run_sim_result, 'alt')
-    
+    if make_ax:
+        plt.tight_layout()
 
 def plot2d(filename, times, plot_data_list):
     '''plot state variables in 2d

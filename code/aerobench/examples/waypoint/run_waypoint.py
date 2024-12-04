@@ -35,7 +35,7 @@ def main():
     # Build Initial Condition Vectors
     # state = [vt, alpha, beta, phi, theta, psi, P, Q, R, pn, pe, h, pow]
     init = [vt, alpha, beta, phi, theta, psi, 0, 0, 0, 0, 0, alt, power]
-    tmax = 70 # simulation time
+    tmax = 75 # simulation time
 
     # make waypoint list
     e_pt = 1000
@@ -45,7 +45,7 @@ def main():
     waypoints = [[e_pt, n_pt, h_pt],
                  [e_pt + 2000, n_pt + 5000, h_pt - 100],
                  [e_pt - 2000, n_pt + 15000, h_pt - 250],
-                 [e_pt - 500, n_pt + 25000, h_pt]]
+                 [e_pt - 500, n_pt + 25000, 300]]
 
     ap = WaypointAutopilot(waypoints, stdout=True)
 
