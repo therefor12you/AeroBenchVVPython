@@ -4,7 +4,7 @@ F-16 GCAS Python
 '''
 
 import numpy as np
-from aerobench.util import fix, sign
+from aerobench.code.aerobench.util import fix, sign
 
 def cm(alpha, el):
     'cm function'

@@ -6,7 +6,7 @@ Thrust function
 
 import numpy as np
 
-from aerobench.util import fix
+from aerobench.code.aerobench.util import fix
 
 def thrust(power, alt, rmach):
     'thrust lookup-table version'

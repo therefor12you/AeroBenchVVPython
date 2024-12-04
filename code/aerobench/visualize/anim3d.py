@@ -20,8 +20,8 @@ import matplotlib
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 
-from aerobench.visualize import plot
-from aerobench.util import StateIndex
+from aerobench.code.aerobench.visualize import plot
+from aerobench.code.aerobench.util import StateIndex
 
 def get_script_path(filename=__file__):
     '''get the path this script'''

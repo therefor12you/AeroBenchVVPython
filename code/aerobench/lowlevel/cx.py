@@ -6,7 +6,7 @@ cx
 
 import numpy as np
 
-from aerobench.util import fix, sign
+from aerobench.code.aerobench.util import fix, sign
 
 def cx(alpha, el):
     'cx definition'

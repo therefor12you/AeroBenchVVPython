@@ -26,23 +26,23 @@ outputs aircraft state vector deriative
 
 from math import sin, cos, pi
 
-from aerobench.lowlevel.adc import adc
-from aerobench.lowlevel.tgear import tgear
-from aerobench.lowlevel.pdot import pdot
-from aerobench.lowlevel.thrust import thrust
-from aerobench.lowlevel.cx import cx
-from aerobench.lowlevel.cy import cy
-from aerobench.lowlevel.cz import cz
-from aerobench.lowlevel.cl import cl
-from aerobench.lowlevel.dlda import dlda
-from aerobench.lowlevel.dldr import dldr
-from aerobench.lowlevel.cm import cm
-from aerobench.lowlevel.cn import cn
-from aerobench.lowlevel.dnda import dnda
-from aerobench.lowlevel.dndr import dndr
-from aerobench.lowlevel.dampp import dampp
+from aerobench.code.aerobench.lowlevel.adc import adc
+from aerobench.code.aerobench.lowlevel.tgear import tgear
+from aerobench.code.aerobench.lowlevel.pdot import pdot
+from aerobench.code.aerobench.lowlevel.thrust import thrust
+from aerobench.code.aerobench.lowlevel.cx import cx
+from aerobench.code.aerobench.lowlevel.cy import cy
+from aerobench.code.aerobench.lowlevel.cz import cz
+from aerobench.code.aerobench.lowlevel.cl import cl
+from aerobench.code.aerobench.lowlevel.dlda import dlda
+from aerobench.code.aerobench.lowlevel.dldr import dldr
+from aerobench.code.aerobench.lowlevel.cm import cm
+from aerobench.code.aerobench.lowlevel.cn import cn
+from aerobench.code.aerobench.lowlevel.dnda import dnda
+from aerobench.code.aerobench.lowlevel.dndr import dndr
+from aerobench.code.aerobench.lowlevel.dampp import dampp
 
-from aerobench.lowlevel.morellif16 import Morellif16
+from aerobench.code.aerobench.lowlevel.morellif16 import Morellif16
 
 def subf16_model(x, u, model, adjust_cy=True):
     '''output aircraft state vector derivative for a given input

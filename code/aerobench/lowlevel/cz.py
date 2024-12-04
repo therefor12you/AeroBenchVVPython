@@ -5,7 +5,7 @@ Cz function
 '''
 
 import numpy as np
-from aerobench.util import fix, sign
+from aerobench.code.aerobench.util import fix, sign
 
 def cz(alpha, beta, el):
     'cz function'

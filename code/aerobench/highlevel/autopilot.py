@@ -12,8 +12,8 @@ from math import pi
 import numpy as np
 from numpy import deg2rad
 
-from aerobench.lowlevel.low_level_controller import LowLevelController
-from aerobench.util import Freezable
+from aerobench.code.aerobench.lowlevel.low_level_controller import LowLevelController
+from aerobench.code.aerobench.util import Freezable
 
 class Autopilot(Freezable):
     '''A container object for the hybrid automaton logic for a particular autopilot instance'''

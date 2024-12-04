@@ -5,7 +5,7 @@ dnda function
 '''
 
 import numpy as np
-from aerobench.util import fix, sign
+from aerobench.code.aerobench.util import fix, sign
 
 def dnda(alpha, beta):
     'dnda function'

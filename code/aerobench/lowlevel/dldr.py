@@ -5,7 +5,7 @@ dldr function
 '''
 
 import numpy as np
-from aerobench.util import sign, fix
+from aerobench.code.aerobench.util import sign, fix
 
 def dldr(alpha, beta):
     'dldr function'

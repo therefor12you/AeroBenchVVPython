@@ -13,7 +13,7 @@ import matplotlib
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 
-from aerobench.util import get_state_names, StateIndex
+from aerobench.code.aerobench.util import get_state_names, StateIndex
 
 def get_script_path(filename=__file__):
     '''get the path this script'''
@@ -36,31 +36,39 @@ def plot_overhead(run_sim_result, waypoints=None, llc=None):
     '''
 
     init_plot()
-
-    res = run_sim_result
     fig = plt.figure(figsize=(7, 5))
-
     ax = fig.add_subplot(1, 1, 1)
 
-    full_states = res['states']
+    # res = run_sim_result
+    # full_states = res['states']
 
-    if llc is not None:
-        num_vars = len(get_state_names()) + llc.get_num_integrators()
-        num_aircraft = full_states[0, :].size // num_vars
-    else:
-        num_vars = full_states[0, :].size
-        num_aircraft = 1
+    # if llc is not None:
+    #     num_vars = len(get_state_names()) + llc.get_num_integrators()
+    #     num_aircraft = full_states[0, :].size // num_vars
+    # else:
+    #     num_vars = full_states[0, :].size
+    #     num_aircraft = 1
+    
+    # for i in range(num_aircraft):
+    #     states = full_states[:, i*num_vars:(i+1)*num_vars]
 
-    for i in range(num_aircraft):
-        states = full_states[:, i*num_vars:(i+1)*num_vars]
+    #     ys = states[:, StateIndex.POSN] # 9: n/s position (ft)
+    #     xs = states[:, StateIndex.POSE] # 10: e/w position (ft)
+
+    #     ax.plot(xs, ys, '-')
+
+    #     label = 'Start' if i == 0 else None
+    #     ax.plot([xs[0]], [ys[1]], 'k*', ms=8, label=label)
+
+    ap_names=['aerobench', 'guidance']
+    for i, res in enumerate(run_sim_result):
+        states = res['states']
 
         ys = states[:, StateIndex.POSN] # 9: n/s position (ft)
         xs = states[:, StateIndex.POSE] # 10: e/w position (ft)
 
-        ax.plot(xs, ys, '-')
-
-        label = 'Start' if i == 0 else None
-        ax.plot([xs[0]], [ys[1]], 'k*', ms=8, label=label)
+        ax.plot(xs, ys, '-', label=ap_names[i])
+        ax.plot([xs[0]], [ys[1]], 'k*', ms=8)
 
     if waypoints is not None:
         xs = [wp[0] for wp in waypoints]
@@ -70,11 +78,8 @@ def plot_overhead(run_sim_result, waypoints=None, llc=None):
 
     ax.set_ylabel('North / South Position (ft)')
     ax.set_xlabel('East / West Position (ft)')
-    
     ax.set_title('Overhead Plot')
-
     ax.axis('equal')
-
     ax.legend()
 
     plt.tight_layout()

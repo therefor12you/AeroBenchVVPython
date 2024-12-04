@@ -5,7 +5,7 @@ dndr function
 '''
 
 import numpy as np
-from aerobench.util import fix, sign
+from aerobench.code.aerobench.util import fix, sign
 
 def dndr(alpha, beta):
     'dndr function'

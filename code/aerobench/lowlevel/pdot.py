@@ -4,7 +4,7 @@ Python F-16
 power derivative (pdot)
 '''
 
-from aerobench.lowlevel.rtau import rtau
+from aerobench.code.aerobench.lowlevel.rtau import rtau
 
 def pdot(p3, p1):
     'pdot function'

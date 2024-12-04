@@ -8,8 +8,8 @@ import time
 import numpy as np
 from scipy.integrate import RK45
 
-from aerobench.highlevel.controlled_f16 import controlled_f16
-from aerobench.util import get_state_names, Euler
+from aerobench.code.aerobench.highlevel.controlled_f16 import controlled_f16
+from aerobench.code.aerobench.util import get_state_names, Euler
 
 def run_f16_sim(initial_state, tmax, ap, step=1/30, extended_states=False, model_str='morelli',
                 integrator_str='rk45', v2_integrators=False):
@@ -84,39 +84,38 @@ def run_f16_sim(initial_state, tmax, ap, step=1/30, extended_states=False, model
     while integrator.status == 'running':
         integrator.step()
 
-        if integrator.t >= times[-1] + step:
-            dense_output = integrator.dense_output()
+        # if integrator.t >= times[-1] + step:
+        dense_output = integrator.dense_output()
 
-            while integrator.t >= times[-1] + step:
-                t = times[-1] + step
-                #print(f"{round(t, 2)} / {tmax}")
+        while integrator.t >= times[-1] + step:
+            t = times[-1] + step
 
-                times.append(t)
-                states.append(dense_output(t))
+            times.append(t)
+            states.append(dense_output(t))
 
-                updated = ap.advance_discrete_mode(times[-1], states[-1])
-                modes.append(ap.mode)
+            updated = ap.advance_discrete_mode(times[-1], states[-1])
+            modes.append(ap.mode)
 
-                # re-run dynamics function at current state to get non-state variables
-                if extended_states:
-                    xd, u, Nz, ps, Ny_r = get_extended_states(ap, times[-1], states[-1], model_str, v2_integrators)
+            # re-run dynamics function at current state to get non-state variables
+            if extended_states:
+                xd, u, Nz, ps, Ny_r = get_extended_states(ap, times[-1], states[-1], model_str, v2_integrators)
 
-                    xd_list.append(xd)
-                    u_list.append(u)
+                xd_list.append(xd)
+                u_list.append(u)
 
-                    Nz_list.append(Nz)
-                    ps_list.append(ps)
-                    Ny_r_list.append(Ny_r)
+                Nz_list.append(Nz)
+                ps_list.append(ps)
+                Ny_r_list.append(Ny_r)
 
-                if ap.is_finished(times[-1], states[-1]):
-                    # this both causes the outer loop to exit and sets res['status'] appropriately
-                    integrator.status = 'autopilot finished'
-                    break
+            if ap.is_finished(times[-1], states[-1]):
+                # this both causes the outer loop to exit and sets res['status'] appropriately
+                integrator.status = 'autopilot finished'
+                break
 
-                if updated:
-                    # re-initialize the integration class on discrete mode switches
-                    integrator = integrator_class(der_func, times[-1], states[-1], tmax, **kwargs)
-                    break
+            if updated:
+                # re-initialize the integration class on discrete mode switches
+                integrator = integrator_class(der_func, times[-1], states[-1], tmax, **kwargs)
+                break
 
     assert 'finished' in integrator.status
 

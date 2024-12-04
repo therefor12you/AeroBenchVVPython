@@ -4,7 +4,7 @@ Low-level flight controller
 '''
 
 import numpy as np
-from aerobench.util import Freezable
+from aerobench.code.aerobench.util import Freezable
 
 class CtrlLimits(Freezable):
     'Control Limits'
@@ -20,7 +20,7 @@ class CtrlLimits(Freezable):
         self.RudderMinDeg = -30
         
         self.NzMax = 6
-        self.NzMin = -1
+        self.NzMin = -2
 
         self.freeze_attrs()
 
