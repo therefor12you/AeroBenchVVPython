@@ -7,9 +7,9 @@ from math import pi, atan2, sqrt, sin, cos, asin
 
 import numpy as np
 
-from aerobench.highlevel.autopilot import Autopilot
-from aerobench.util import StateIndex
-from aerobench.lowlevel.low_level_controller import LowLevelController
+from aerobench.code.aerobench.highlevel.autopilot import Autopilot
+from aerobench.code.aerobench.util import StateIndex
+from aerobench.code.aerobench.lowlevel.low_level_controller import LowLevelController
 
 class WaypointAutopilot(Autopilot):
     '''waypoint follower autopilot'''
@@ -48,7 +48,7 @@ class WaypointAutopilot(Autopilot):
 
         # Ranges for Nz
         self.cfg_max_nz_cmd = 4
-        self.cfg_min_nz_cmd = -1
+        self.cfg_min_nz_cmd = -2
 
         self.done_time = 0.0
 
