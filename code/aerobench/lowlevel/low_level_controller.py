@@ -11,7 +11,7 @@ class CtrlLimits(Freezable):
 
     def __init__(self):
         self.ThrottleMax = 1 # Afterburner on for throttle > 0.7
-        self.ThrottleMin = 0
+        self.ThrottleMin = 0.5
         self.ElevatorMaxDeg = 25
         self.ElevatorMinDeg = -25
         self.AileronMaxDeg = 21.5
@@ -33,8 +33,8 @@ class LowLevelController(Freezable):
                           [-23.91233, 5.69968, -21.63431, 64.49490, -88.36203]], dtype=float)
 
     old_xequil = np.array([502.0, 0.0389, 0.0, 0.0, 0.0389, 0.0, 0.0, 0.0, \
-                        0.0, 0.0, 0.0, 1000.0, 9.0567], dtype=float).transpose()
-    old_uequil = np.array([0.1395, -0.7496, 0.0, 0.0], dtype=float).transpose()
+                        0.0, 0.0, 0.0, 20000.0, 9.0567], dtype=float).transpose()
+    old_uequil = np.array([0.1395, -0.7496, 0., 0.], dtype=float).transpose()
 
     def __init__(self, gain_str='old'):
         # Hard coded LQR gain matrix from matlab version
@@ -86,7 +86,7 @@ class LowLevelController(Freezable):
         ## Limit controls to saturation limits
         ctrlLimits = self.ctrlLimits
 
-        # Limit throttle from 0 to 1
+        # Limit throttle from 0.5 to 1
         u_deg[0] = max(min(u_deg[0], ctrlLimits.ThrottleMax), ctrlLimits.ThrottleMin)
 
         # Limit elevator from -25 to 25 deg
